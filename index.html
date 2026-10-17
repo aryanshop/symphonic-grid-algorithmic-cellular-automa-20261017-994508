@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symphonic Grid: Algorithmic Cellular Automata Music Sequencer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo-area">
+                <h1>Symphonic Grid</h1>
+                <span class="badge">Generative Audio-Visualizer</span>
+            </div>
+            <p class="subtitle">Paint living cellular patterns that compose hypnotic ambient music in real-time.</p>
+        </header>
+
+        <main class="main-layout">
+            <section class="canvas-section">
+                <div class="canvas-toolbar">
+                    <div class="group">
+                        <button id="btn-play" class="btn btn-primary" aria-label="Play Sequencer">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            <span>Play</span>
+                        </button>
+                        <button id="btn-pause" class="btn" aria-label="Pause Sequencer" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                            <span>Pause</span>
+                        </button>
+                        <button id="btn-step" class="btn" aria-label="Step Forward">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="4" x2="19" y2="20"></line></svg>
+                            <span>Step</span>
+                        </button>
+                    </div>
+                    <div class="group">
+                        <button id="btn-clear" class="btn btn-subtle">Clear</button>
+                        <button id="btn-random" class="btn btn-subtle">Randomize</button>
+                        <button id="btn-preset" class="btn btn-subtle">Presets</button>
+                    </div>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <canvas id="gridCanvas" width="640" height="640"></canvas>
+                    <div id="audioOverlay" class="audio-overlay">
+                        <div class="overlay-content">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                            <h2>Click to Initialize Sound Engine</h2>
+                            <p>Browsers require user interaction before playing audio.</p>
+                            <button id="btn-enable-audio" class="btn btn-primary btn-large">Start Experience</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-bar">
+                    <span>Generation: <strong id="genCount">0</strong></span>
+                    <span>Active Cells: <strong id="cellCount">0</strong></span>
+                    <span>Notes Triggered: <strong id="noteCount">0</strong></span>
+                </div>
+            </section>
+
+            <aside class="control-sidebar">
+                <div class="control-card">
+                    <h3>Sequencer Controls</h3>
+                    
+                    <div class="control-group">
+                        <label for="tempoSlider">Tempo: <span id="tempoVal">120</span> BPM</label>
+                        <input type="range" id="tempoSlider" min="40" max="240" value="120" step="2">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="instrumentSelect">Instrument Timbre</label>
+                        <select id="instrumentSelect">
+                            <option value="synth">Warm Synth</option>
+                            <option value="pluck">Plucked String</option>
+                            <option value="bell">Crystal Bell</option>
+                            <option value="marimba">Wood Marimba</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="scaleSelect">Musical Scale</label>
+                        <select id="scaleSelect">
+                            <option value="pentatonic">Major Pentatonic</option>
+                            <option value="minorPentatonic">Minor Pentatonic</option>
+                            <option value="dorian">Dorian Mode</option>
+                            <option value="chromatic">Chromatic Drift</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="rootSelect">Root Note</label>
+                        <select id="rootSelect">
+                            <option value="C3">C3</option>
+                            <option value="D3">D3</option>
+                            <option value="E3">E3</option>
+                            <option value="F3">F3</option>
+                            <option value="G3" selected>G3</option>
+                            <option value="A3">A3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <h3>Automata Rules</h3>
+                    
+                    <div class="control-group">
+                        <label for="brushSelect">Drawing Tool</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="brush" value="draw" checked> Single Cell</label>
+                            <label><input type="radio" name="brush" value="glider"> Glider Gun</label>
+                            <label><input type="radio" name="brush" value="pulsar"> Pulsar</label>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="mutationSlider">Spontaneous Mutation: <span id="mutationVal">0</span>%</label>
+                        <input type="range" id="mutationSlider" min="0" max="5" value="0" step="0.5">
+                        <span class="hint">Randomly spawns cells to keep music evolving.</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="gridSizeSelect">Grid Resolution</label>
+                        <select id="gridSizeSelect">
+                            <option value="16">16 x 16 (Coarse)</option>
+                            <option value="24" selected>24 x 24 (Balanced)</option>
+                            <option value="32">32 x 32 (Detailed)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <h3>Visual Theme</h3>
+                    <div class="theme-picker">
+                        <button class="theme-btn active" data-theme="nebula" style="background: #7c3aed;"></button>
+                        <button class="theme-btn" data-theme="emerald" style="background: #059669;"></button>
+                        <button class="theme-btn" data-theme="sunset" style="background: #ea580c;"></button>
+                        <button class="theme-btn" data-theme="mono" style="background: #374151;"></button>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="app-footer">
+            <p>Crafted with vanilla HTML5 Canvas & Web Audio API. No external libraries or servers required.</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
